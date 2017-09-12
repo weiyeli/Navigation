@@ -1,0 +1,97 @@
+<!--<%&#45;&#45;-->
+  <!--Created by IntelliJ IDEA.-->
+  <!--User: 胡瑾凡-->
+  <!--Date: 2017/9/8-->
+  <!--Time: 14:18-->
+  <!--To change this template use File | Settings | File Templates.-->
+<!--&#45;&#45;%>-->
+<!--<%@ page contentType="text/html;charset=UTF-8" language="java" %>-->
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/JS/myJS/myCss.css">
+<link rel="stylesheet" href="/JS/bootstrap-3.3.7-dist/css/bootstrap.min.css">
+<script src="/JS/myJS/functions.js"></script>
+<script src="/JS/bootstrap-3.3.7-dist/js/jquery-3.2.0.js"></script>
+<script src="/JS/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="http://webapi.amap.com/maps?v=1.4.0&key=03a6088bb14c910d635412b3e78f013a"></script>
+
+
+
+<html>
+<head>
+    <style type="text/css">
+        body,html,#container{
+            height: 100%;
+            margin: 0px;
+        }
+    </style>
+    <title>Pathing System</title>
+</head>
+<body>
+    <div id="container"></div>
+    <button id="start" type="button" class="btn btn-success" style="left: 100px; top: 50px; position: absolute; width: 150px; background-color: rgba(115,184,114,0.7); color: #ffffff;" onclick="startListShow()">
+        起点 <span class="glyphicon glyphicon-triangle-bottom" id="start_show" aria-hidden="true"></span>
+    </button>
+    <button id="medium" type="button" class="btn btn-info" style="left: 300px; top: 50px; position: absolute; width: 150px; background-color: rgba(69,156,184,0.7); color: #ffffff;" onclick="mediumListShow()">
+        中间点 <span class="glyphicon glyphicon-triangle-bottom" id="medium_show" aria-hidden="true"></span>
+    </button>
+    <button id="end" type="button" class="btn btn-danger" style="left: 500px; top: 50px; position: absolute; width: 150px; background-color: rgba(184,111,105,0.7); color: #ffffff;" onclick="endListShow()">
+        终点 <span class="glyphicon glyphicon-triangle-bottom" id="end_show" aria-hidden="true"></span>
+    </button>
+    <button id="search" type="button" class="btn btn-warning" onclick="searchPath()" style="left: 700px; top: 50px; position: absolute; width: 150px; color: #ffffff;">
+        搜寻路线
+    </button>
+    <button id="reset" type="button" class="btn btn-danger" onclick="reset()" style="left: 100%; margin-left: -250px; top: 50px; position: absolute; width: 150px; color: #ffffff;">
+        重置
+    </button>
+    <div id="startListDiv" style="overflow-y: scroll; overflow-x: hidden;left: 100px; top: 100px; width: 300px; height: 600px; position: absolute; display: none; background-color: transparent">
+
+    </div>
+    <div id="mediumListDiv" style="overflow-y: scroll; overflow-x: hidden; left: 300px; top: 100px; width: 300px; height: 600px; position: absolute; display: none; background-color: transparent">
+
+    </div>
+    <div id="endListDiv" style="overflow-y: scroll; overflow-x: hidden; left: 500px; top: 100px; width: 300px; height: 600px; position: absolute; display: none; background-color: transparent">
+
+    </div>
+    <div class="modal fade" id="startPointEmpty" style="top: 35%">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4 class="modal-title" style="color: #ff7654">警告</h4>
+                </div>
+                <div  class="modal-body">
+                    请选择起点！
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" style="padding-left: 24px;padding-right: 24px">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="endPointEmpty" style="top: 35%">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4 class="modal-title" style="color: #ff7654">警告</h4>
+                </div>
+                <div  class="modal-body">
+                    请选择终点！
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" style="padding-left: 24px;padding-right: 24px">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        initStartList();
+        initMediumList();
+        initEndList();
+
+        drawMap();
+    </script>
+</body>
+</html>

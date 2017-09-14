@@ -58,7 +58,6 @@ public class TxTsp {
     public Map<String, Object> solve(int start, int end, int[] middle) throws IOException {
 
         init("D:\\JavaProject\\navigation\\src\\main\\java\\com\\stu\\navigation\\navigation\\resources\\graph.csv");
-
         if (start < 0 || end > 49 || middle.length < 0) {
             System.out.println("参数错误");
             return null;
@@ -67,6 +66,48 @@ public class TxTsp {
         // 如果中间节点数目为0，则直接求起点到终点的最短距离
         if (middle.length == 0) {
             return dijkstra(start, end);
+        }
+
+        // 如果中间节点数目为1
+        if (middle.length == 1) {
+
+            int middlePoint = middle[0];
+            ArrayList<Integer> list = new ArrayList<>();
+            list.add(middlePoint);
+
+            // 计算起点到中间节点和中间节点到终点的路径和距离
+            Map<String, Object> startToMiddleMap = new HashMap<>();
+            Map<String, Object> middleToEndMap = new HashMap<>();
+            startToMiddleMap = dijkstra(start, middlePoint);
+            middleToEndMap = dijkstra(middlePoint, end);
+
+            // 总路径
+            List<Integer> loopResPathList = new ArrayList<>();
+            // 总距离
+            int loopResDistance = -1;
+
+            if (startToMiddleMap.containsKey("error") || middleToEndMap.containsKey("error")) {
+
+                Map<String, Object> map = new HashMap<>();
+                map.put("path", null);
+                map.put("sd", -1);
+                map.put("error", "-1");
+                return map;
+            }
+
+
+            loopResPathList.addAll((ArrayList) startToMiddleMap.get("path"));
+            loopResPathList.addAll(list);
+            loopResPathList.addAll((ArrayList) middleToEndMap.get("path"));
+            ArrayUtil.buttifyList(loopResPathList);
+
+            loopResDistance = Integer.parseInt(startToMiddleMap.get("sd").toString()) +
+                    Integer.parseInt(middleToEndMap.get("sd").toString());
+
+            Map<String, Object> resMap = new HashMap<>();
+            resMap.put("path", loopResPathList);
+            resMap.put("sd", loopResDistance);
+            return resMap;
         }
 
         // 路径记录数组path
@@ -181,7 +222,6 @@ public class TxTsp {
     }
 
     public Map<String, Object> dijkstra(int start, int end) throws IOException {
-//        init("D:\\JavaProject\\STU_Navigation\\src\\resources\\test.csv");
 
         Map<String, Object> map = new HashMap<>();
         Queue<Integer> queue = new PriorityQueue<>();
@@ -213,10 +253,10 @@ public class TxTsp {
         }
 
         // 判断起点和终点是否连通
-        if (!isUnion(start,end)){
-            map.put("path",null);
-            map.put("sd",-1);
-            map.put("error","起点和终点不连通");
+        if (!isUnion(start, end)) {
+            map.put("path", null);
+            map.put("sd", -1);
+            map.put("error", "起点和终点不连通");
             return map;
         }
 
@@ -266,19 +306,15 @@ public class TxTsp {
 
             // 以k为中心点，更新起点到未访问点的距离
             Iterator<Integer> iterator = indexMinHeap.iterator();
-            while (iterator.hasNext()){
-                int i = iterator.next()-1;
+            while (iterator.hasNext()) {
+                int i = iterator.next() - 1;
                 if (!visited[i] && distance[k][i] != M) {
                     int callen = min + distance[k][i];                    // 执行一次松弛操作
                     if (shortest[i] == M || shortest[i] > callen) {
                         shortest[i] = callen;
-                        indexMinHeap.changeKey(i+1, callen);
+                        indexMinHeap.changeKey(i + 1, callen);
                         // 复制一份经过k点的路径
-                        for (int j = 0; j < path[k].length; j++) {
-                            if (path[k][j] != -1){
-                                path[i][j] = path[k][j];
-                            }
-                        }
+                        path[i] = Arrays.copyOf(path[k], path[k].length);
 //                        // 将k加入到i的最短路径
 //                        for (int j = 0; j < path[i].length; j++) {
 //                            if (path[i][j] == -1) {

@@ -1,8 +1,8 @@
 package com.stu.navigation.navigation.mdoel;
 
 
-        import java.util.Iterator;
-        import java.util.NoSuchElementException;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /*
 最小索引堆
@@ -104,7 +104,7 @@ public class IndexMinHeap implements Iterable<Integer> {
         adjustDown(pqi);
         qp[i] = -1;
         keys[i] = -1;
-        pq[N+1] = -1;
+        pq[N + 1] = -1;
     }
 
     /*
@@ -118,9 +118,9 @@ public class IndexMinHeap implements Iterable<Integer> {
         if (keys[i] == key)
             throw new IllegalArgumentException("argument key equal to the origin key");
         if (keys[i] > key)
-            decreaseKey(i,key);
+            decreaseKey(i, key);
         else
-            increaseKey(i,key);
+            increaseKey(i, key);
     }
 
     /*
@@ -195,10 +195,10 @@ public class IndexMinHeap implements Iterable<Integer> {
             int l = 2 * i;    //左儿子的位置
             while (l < N && less(l + 1, l))  //保证有右儿子，并且比较左儿子和右儿子的大小
                 l++;
-            if (less(l,i)){
+            if (less(l, i)) {
                 swap(l, i);
                 i = l;
-            }else break;
+            } else break;
 
         }
     }
@@ -231,7 +231,7 @@ public class IndexMinHeap implements Iterable<Integer> {
         //takes linear time since already in heap order so no keys move
         public HeapIterator() {
             copy = new IndexMinHeap(maxN);
-            for (int i = 1; i <=N ; i++) {
+            for (int i = 1; i <= N; i++) {
                 int ki = pq[i];
                 int key = keys[ki];
                 copy.insert(ki, key);
@@ -254,11 +254,11 @@ public class IndexMinHeap implements Iterable<Integer> {
 
     public static void main(String[] args) {
         IndexMinHeap indexMinHeap = new IndexMinHeap(10);
-        indexMinHeap.insert(1,10);
-        indexMinHeap.insert(2,8);
-        indexMinHeap.insert(3,99);
-        indexMinHeap.changeKey(2,5);
-        indexMinHeap.changeKey(2,1000);
+        indexMinHeap.insert(1, 10);
+        indexMinHeap.insert(2, 8);
+        indexMinHeap.insert(3, 99);
+        indexMinHeap.changeKey(2, 5);
+        indexMinHeap.changeKey(2, 1000);
         System.out.println(indexMinHeap.minIndex());
     }
 

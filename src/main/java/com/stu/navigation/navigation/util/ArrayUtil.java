@@ -16,7 +16,6 @@ public class ArrayUtil {
     static List<String> test = new ArrayList<>();
 
     public static List<int[]> getAllSortArray(int[] array) {
-//        List<int[]> list = allSort(array, 0, array.length - 1);
         allSort(array, 0, array.length - 1);
         System.out.println(test);
         return resList;
@@ -27,13 +26,11 @@ public class ArrayUtil {
         for (int i = begin; i <= end; i++) {
             // 打印数组的内容
             if (begin == end) {
-                System.out.println(Arrays.toString(array));
                 int[] a = new int[array.length];
                 for (int j = 0; j < array.length; j++) {
                     a[j] = array[j];
                 }
                 resList.add(a);
-//                test.add(Arrays.toString(array));
                 return;
             }
             swap(array, begin, i);

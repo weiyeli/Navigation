@@ -1,4 +1,4 @@
-package com.stu.navigation.navigation.io;
+package com.stu.navigation.navigation.service;
 
 
 import com.stu.navigation.navigation.service.TxTsp;
@@ -18,10 +18,7 @@ public class PathService {
     public Map<String, Object> getPathMap(int start, int end, int[] middle) throws IOException {
 
         TxTsp txTsp = new TxTsp(SIZE);
-//        int[] middle = {1, 2, 3};
         Map<String, Object> map = txTsp.solve(start, end, middle);
-        System.out.println((ArrayList) map.get("path"));
-        System.out.println(Integer.parseInt(map.get("sd").toString()));
         return map;
     }
 }

@@ -14,8 +14,7 @@
 <script src="/JS/bootstrap-3.3.7-dist/js/jquery-3.2.0.js"></script>
 <script src="/JS/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="http://webapi.amap.com/maps?v=1.4.0&key=03a6088bb14c910d635412b3e78f013a"></script>
-
-
+<script src="//webapi.amap.com/ui/1.0/main.js?v=1.0.10"></script>
 
 <html>
 <head>
@@ -23,6 +22,21 @@
         body,html,#container{
             height: 100%;
             margin: 0px;
+        }
+
+        #pathLength{
+            text-align: center;
+            font-size: 14px;
+            padding-top: 7px;
+            padding-bottom: 7px;
+            left: 900px;
+            top: 50px;
+            width: 300px;
+            height: 34px;
+            border: 1px;
+            border-radius: 5px;
+            position: absolute;
+            background-color: rgb(255, 244, 120);
         }
     </style>
     <title>Pathing System</title>
@@ -41,6 +55,7 @@
     <button id="search" type="button" class="btn btn-warning" onclick="searchPath()" style="left: 700px; top: 50px; position: absolute; width: 150px; color: #ffffff;">
         搜寻路线
     </button>
+    <div id="pathLength" style="display: none"></div>
     <button id="reset" type="button" class="btn btn-danger" onclick="reset()" style="left: 100%; margin-left: -250px; top: 50px; position: absolute; width: 150px; color: #ffffff;">
         重置
     </button>
@@ -62,6 +77,22 @@
                 </div>
                 <div  class="modal-body">
                     请选择起点！
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" style="padding-left: 24px;padding-right: 24px">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="mediumPointEmpty" style="top: 35%">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4 class="modal-title" style="color: #ff7654">警告</h4>
+                </div>
+                <div  class="modal-body">
+                    请选择中间点！
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-dismiss="modal" style="padding-left: 24px;padding-right: 24px">确定</button>

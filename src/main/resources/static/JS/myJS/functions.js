@@ -10,8 +10,10 @@ var mediumPoints = [];
 var endPoint = null;
 
 var markers = [];
-
+var searched = false;
 var map;
+var pathSimplifierIns = null;
+var navg0 = null;
 
 var startListShow = function () {
     $('#startListDiv').stop();
@@ -128,6 +130,9 @@ var startEventBinding = function () {
 };
 
 function startDis(evt) {
+    if (searched) {
+        reset();
+    }
     if (startPoint === evt.data.id) {
         $('#start' + startPoint).removeAttr("style");
         $('#start' + startPoint).attr('class', 'btnStartList');
@@ -186,6 +191,9 @@ var mediumEventBinding = function () {
 };
 
 function mediumDis(evt) {
+    if (searched) {
+        reset();
+    }
     if (evt.data.id !== startPoint && evt.data.id !== endPoint) {
         if (mediumPoints.indexOf(evt.data.id) === -1) {
             mediumPoints.push(evt.data.id);
@@ -209,11 +217,14 @@ var endEventBinding = function () {
 };
 
 function endDis(evt) {
+    if (searched) {
+        reset();
+    }
     if (endPoint === evt.data.id) {
         $('#end' + endPoint).removeAttr("style");
         $('#end' + endPoint).attr('class', 'btnEndList');
         $('#end' + endPoint).blur();
-        if (endPoint !== startPoint){
+        if (endPoint !== startPoint) {
             $('#medium' + endPoint).removeAttr("style");
             $('#medium' + endPoint).attr('class', 'btnMediumList');
             markers[endPoint].setIcon('../../images/mark_b.png');
@@ -225,7 +236,7 @@ function endDis(evt) {
         endPoint = null;
     }
     else {
-        if (endPoint !== null){
+        if (endPoint !== null) {
             $('#end' + endPoint).removeAttr("style");
             $('#end' + endPoint).attr('class', 'btnEndList');
             if (startPoint === endPoint) {
@@ -241,7 +252,7 @@ function endDis(evt) {
         endPoint = evt.data.id;
         $('#end' + evt.data.id).css('background-color', 'rgba(180, 114, 108, 0.7)');
         $('#end' + evt.data.id).blur();
-        if (mediumPoints.indexOf(evt.data.id) !== -1){
+        if (mediumPoints.indexOf(evt.data.id) !== -1) {
             mediumPoints.splice(mediumPoints.indexOf(evt.data.id), 1);
         }
         $('#medium' + evt.data.id).removeAttr("style");
@@ -261,18 +272,32 @@ function endDis(evt) {
 }
 
 var searchPath = function () {
-    if (startPoint === null) {
-        $('#startPointEmpty').modal('show');
-    }
-    else if (endPoint === null) {
-        $('#endPointEmpty').modal('show');
-    }
-    else {
-        postData();
+    if (!searched) {
+        if (startPoint === null) {
+            $('#startPointEmpty').modal('show');
+        }
+        else if (endPoint === null) {
+            $('#endPointEmpty').modal('show');
+        }
+        else if (startPoint !== null && startPoint === endPoint && mediumPoints.length === 0) {
+            $('#mediumPointEmpty').modal('show');
+        }
+        else {
+            searched = true;
+            postData();
+        }
     }
 };
 
 var reset = function () {
+    if (pathSimplifierIns !== null) {
+        pathSimplifierIns.clearPathNavigators();
+        pathSimplifierIns.hide();
+        pathSimplifierIns = null;
+    }
+    if (navg0 !== null) {
+        navg0.destroy();
+    }
     $('#start' + startPoint).removeAttr("style");
     $('#start' + startPoint).attr('class', 'btnStartList');
     $('#end' + endPoint).removeAttr("style");
@@ -295,9 +320,11 @@ var reset = function () {
     $('#medium' + startPoint).attr('class', 'btnMediumList');
     $('#medium' + endPoint).removeAttr("style");
     $('#medium' + endPoint).attr('class', 'btnMediumList');
+    $('#pathLength').fadeOut();
     startPoint = null;
     endPoint = null;
     mediumPoints = [];
+    searched = false;
 };
 
 var lowerMedium = function () {
@@ -308,16 +335,19 @@ var lowerMedium = function () {
     }
 };
 
-var upperMedium = function (mediumPoints) {
+var upperMedium = function (Points) {
+    startPoint = startPoint + 1;
+    endPoint = endPoint + 1;
     for (var i = 0; i < mediumPoints.length; i++) {
         mediumPoints[i] = mediumPoints[i] + 1;
+    }
+    for (var j = 0; j < Points.length; j++) {
+        Points[j] = Points[j] + 1;
     }
 };
 
 var postData = function () {
-    console.log(startPoint);
     lowerMedium();
-    console.log(startPoint);
 
     var dataPost = {
         'start': startPoint,
@@ -332,61 +362,62 @@ var postData = function () {
         contentType:"application/json; charset=utf-8",
         dataType:"json",
         success: function (message) {
-            console.log(message.path);
+            $('#pathLength').html('路径长度为：' + message.sd + 'm');
+            $('#pathLength').fadeIn();
             upperMedium(message.path);
-            console.log(message.path);
             var finalPoints = [];
             for (var i = 0; i < message.path.length; i++) {
                 var temp = data['p'+message.path[i]];
-                console.log(temp);
                 var latlng = [temp.loc.x, temp.loc.y];
                 finalPoints.push(latlng);
             }
 
-            new AMap.Polyline({
-                map: map,
-                path: finalPoints,
-                strokeColor: '#ff7754',
-                strokeWeight: 8,
-                strokeStyle: 'solid',
-                geodesic: true,
-                showDir: true
-            });
+            // new AMap.Polyline({
+            //     map: map,
+            //     path: finalPoints,
+            //     strokeColor: '#ff7754',
+            //     strokeWeight: 8,
+            //     strokeStyle: 'solid',
+            //     geodesic: true,
+            //     showDir: true
+            // });
 
-            // AMapUI.load(['ui/misc/PathSimplifier', 'lib/$'], function(PathSimplifier, $) {
-            //
-            //     if (!PathSimplifier.supportCanvas) {
-            //         alert('当前环境不支持 Canvas！');
-            //         return;
-            //     }
-            //
-            //     var pathSimplifierIns = new PathSimplifier({
-            //         zIndex: 100,
-            //         map: map, //所属的地图实例
-            //         renderOptions: {
-            //             renderAllPointsIfNumberBelow: 100 //绘制路线节点，如不需要可设置为-1
-            //         }
-            //     });
-            //
-            //     window.pathSimplifierIns = pathSimplifierIns;
-            //
-            //     //设置数据
-            //     pathSimplifierIns.setData([{
-            //         name: '路线0',
-            //         path: finalPoints
-            //     }]);
-            //
-            //     var navg0 = pathSimplifierIns.createPathNavigator(0, //关联第1条轨迹
-            //         {
-            //             loop: true, //循环播放
-            //             speed: 100
-            //         });
-            //
-            //     navg0.start();
-            // })
+            AMapUI.load(['ui/misc/PathSimplifier', 'lib/$'], function(PathSimplifier, $) {
+
+                if (!PathSimplifier.supportCanvas) {
+                    alert('当前环境不支持 Canvas！');
+                    return;
+                }
+
+                pathSimplifierIns = new PathSimplifier({
+                    zIndex: 500,
+                    map: map, //所属的地图实例
+                    getPath: function(pathData, pathIndex) {
+                        return pathData.path;
+                    },
+                    renderOptions: {
+                        renderAllPointsIfNumberBelow: 100 //绘制路线节点，如不需要可设置为-1
+                    }
+                });
+
+                window.pathSimplifierIns = pathSimplifierIns;
+
+                //设置数据
+                pathSimplifierIns.setData([{
+                    name: '路线0',
+                    path: finalPoints
+                }]);
+
+                navg0 = pathSimplifierIns.createPathNavigator(0, //关联第1条轨迹
+                    {
+                        loop: true, //循环播放
+                        speed: 400
+                    });
+
+                navg0.start();
+            });
         }
     })
-
 };
 
 var drawMap = function () {
@@ -400,6 +431,14 @@ var drawMap = function () {
         features : ['bg', 'building']
     });
 
+    // AMap.event.addListener(map, "click", function(e) {
+    //     console.log(e.lnglat);
+    //     new AMap.Marker({
+    //         position: e.lnglat,
+    //         map: map
+    //     });
+    // });
+
     var line = [
         [[116.639277, 23.40872], [116.638166, 23.40876], [116.637726, 23.40871], [116.636514, 23.410059], [116.635913, 23.410807],
             [116.635119, 23.411595], [116.635012, 23.412001], [116.633284, 23.412772], [116.633478, 23.41398], [116.633199, 23.414431],
@@ -412,9 +451,9 @@ var drawMap = function () {
         [[116.633553, 23.410502], [116.633901, 23.409902]],
         [[116.633199, 23.414431], [116.633054, 23.414194], [116.631654, 23.414527], [116.630731, 23.41465], [116.630157, 23.415435]],
         [[116.633054, 23.414194], [116.631686, 23.412826]],
-        [[116.630731, 23.41465], [116.631214, 23.415523]],
+        [[116.630731, 23.41465], [116.631536, 23.416326]],
         [[116.638166, 23.40876], [116.637522, 23.409961], [116.636514, 23.410059]],
-        [[116.636514, 23.410059], [116.637758, 23.411137], [116.637576, 23.411871], [116.638236, 23.411561]],
+        [[116.637522, 23.409961], [116.637758, 23.411137], [116.637576, 23.411871], [116.638236, 23.411561]],
         [[116.638048, 23.410896], [116.637758, 23.411137], [116.63616, 23.411812], [116.635119, 23.411595]],
         [[116.637576, 23.411871], [116.638076, 23.412469], [116.637415, 23.412575], [116.637479, 23.412855], [116.636525, 23.413126], [116.635709, 23.412432], [116.63616, 23.411812]],
         [[116.635709, 23.412432], [116.635012, 23.412001], [116.635071, 23.41288], [116.633284, 23.412772]],
@@ -422,7 +461,11 @@ var drawMap = function () {
         [[116.633199, 23.414431], [116.633323, 23.41495], [116.632866, 23.414972]],
         [[116.63535, 23.414504], [116.634143, 23.415863], [116.633633, 23.415479]],
         [[116.634143, 23.415863], [116.631257, 23.417005]],
-        [[116.631214, 23.415523], [116.631257, 23.417005]],
+        [[116.631536, 23.416326], [116.631257, 23.417005]],
+        [[116.637758, 23.411137], [116.638236, 23.411561]],
+        [[116.630157, 23.415435], [116.631536, 23.416326]],
+        [[116.630157, 23.415435], [116.63005, 23.414445]],
+        [[116.631536, 23.416326], [116.632025, 23.41622]],
         [[116.633553, 23.410502], [116.63455, 23.409936]]
     ];
 
@@ -438,16 +481,16 @@ var drawMap = function () {
     }
 
     for (var loca = 1; loca <= data.length; loca++) {
-        var temp = data['p'+loca];
-        if (temp.loc.x !== 0 && temp.selectable){
+        var temp = data['p' + loca];
+        if (temp.loc.x !== 0 && temp.selectable) {
             markers[loca] = new AMap.Marker({
-                zIndex: 300,
+                zIndex: 1000,
                 position: [temp.loc.x, temp.loc.y],
                 map: map,
                 title: temp.name,
                 label: {
                     content: temp.name,
-                    offset: new AMap.Pixel(temp.offset.x,temp.offset.y)
+                    offset: new AMap.Pixel(temp.offset.x, temp.offset.y)
                 },
                 extData: {
                     position: null,
@@ -542,15 +585,15 @@ var data = {
     p12: {
         id: 12,
         name: '旧体育馆',
-        loc: {x: 116.631214, y: 23.415523},
-        offset: {x: 20, y: 20},
+        loc: {x: 116.631536, y: 23.416326},
+        offset: {x: -55, y: 25},
         selectable: true
     },
     p13: {
         id: 13,
         name: 'EF宿舍',
         loc: {x: 116.632025, y: 23.41622},
-        offset: {x: -52, y: 20},
+        offset: {x: 20, y: -26},
         selectable: true
     },
     p14: {
